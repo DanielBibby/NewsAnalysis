@@ -7,7 +7,8 @@ from utils import create_dashboard
 
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from backend.src.analysis_chain.chain import BaseAnalysisChain
 
@@ -19,10 +20,12 @@ st.set_page_config(layout="wide")
 
 st.title("News Sentiment and Stock Analysis 🧐")
 
-st.markdown("""
+st.markdown(
+    """
     This app provides a simple interface to see how the sentiment of news articles about a company has changed over
     the last week, month, or year. Additionally, it retrieves and displays stock price data for the selected company.
-""")
+"""
+)
 
 st.divider()
 
@@ -31,13 +34,13 @@ st.markdown(
     *Note - I have tested the entities in the dropdown box 
     to make sure they present results well. Feel free to enter 
     a different company but don't expect total robustness.*
-""")
+"""
+)
 
 st.divider()
 
 multi_company = st.selectbox(
-    label="Select company here",
-    options=["Tesla", "Meta", "JPMorgan"]
+    label="Select company here", options=["Tesla", "Meta", "JPMorgan"]
 )
 
 st.markdown("**Or**")
@@ -50,11 +53,10 @@ with col2:
     stock_code = st.text_input(label="Stock Ticker (Optional)")
 
 time_frame = st.radio(
-    label="How far back would you like to see",
-    options=["One Week", "One Month"]
+    label="How far back would you like to see", options=["One Week", "One Month"]
 )
 
-#time_frame = st.select_slider(label = "How far back would you like to see?", options=[str(i) + " Days" for i in range(7, 31)])
+# time_frame = st.select_slider(label = "How far back would you like to see?", options=[str(i) + " Days" for i in range(7, 31)])
 
 # Map the selected time frame to a timedelta
 time_frame_map = {
@@ -71,7 +73,9 @@ default_tickers = {"Tesla": "TSLA", "Meta": "META", "JPMorgan": "JPM"}
 ticker = stock_code or default_tickers.get(multi_company, None)
 
 if ticker:
-    st.subheader(f"Stock Data for {multi_company if not company else company} ({ticker})")
+    st.subheader(
+        f"Stock Data for {multi_company if not company else company} ({ticker})"
+    )
 
     if company:
         chain = BaseAnalysisChain(
@@ -106,5 +110,3 @@ if ticker:
     st.pyplot(fig)
 else:
     st.warning("Please provide a valid stock ticker symbol.")
-
-

@@ -5,6 +5,7 @@ from typing import List, Optional
 from backend.src.sentiment_analysis.analysis import SentimentAnalysis
 from backend.src.news_finder.finder import NewsFinder
 
+
 class BaseAnalysisChain(BaseModel):
     company: str
     start_date: str
@@ -14,13 +15,19 @@ class BaseAnalysisChain(BaseModel):
     news_finder: Optional[NewsFinder] = None
     sentiment_analysis: SentimentAnalysis = SentimentAnalysis()
 
-    def __init__(self,
-                 company: str,
-                 start_date: str,
-                 end_date: str,
-                 additional: List[str] = [],
-                 ):
-        super().__init__(company=company, start_date=start_date, end_date=end_date, additional=additional)
+    def __init__(
+        self,
+        company: str,
+        start_date: str,
+        end_date: str,
+        additional: List[str] = [],
+    ):
+        super().__init__(
+            company=company,
+            start_date=start_date,
+            end_date=end_date,
+            additional=additional,
+        )
 
         self.company = company
         self.start_date = start_date
@@ -45,7 +52,10 @@ class BaseAnalysisChain(BaseModel):
         sentiments = self.sentiment_analysis.perform_sentiment_analysis(descriptions)
 
         # prepare output
-        filtered_contents = [{"source": article["source"]["name"], "publishedAt": article["publishedAt"]} for article in articles]
+        filtered_contents = [
+            {"source": article["source"]["name"], "publishedAt": article["publishedAt"]}
+            for article in articles
+        ]
         df = pd.DataFrame(filtered_contents)
         df["sentiments"] = sentiments
 

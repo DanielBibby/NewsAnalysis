@@ -22,7 +22,9 @@ class NewsFinder(BaseModel):
         :return: URL string
         """
         if not news_api_key:
-            raise ValueError("API key not found. Make sure it's set in the environment variables.")
+            raise ValueError(
+                "API key not found. Make sure it's set in the environment variables."
+            )
 
         base_url = "https://newsapi.org/v2/everything"
         query = f"{self.company}"
@@ -52,7 +54,9 @@ class NewsFinder(BaseModel):
         url = self._create_url()
         response = requests.get(url)
         if response.status_code != 200:
-            raise Exception(f"Failed to fetch articles. HTTP Status: {response.status_code}, Response: {response.text}")
+            raise Exception(
+                f"Failed to fetch articles. HTTP Status: {response.status_code}, Response: {response.text}"
+            )
 
         articles = response.json().get("articles", [])
         total_articles = response.json().get("totalResults", 0)

@@ -4,16 +4,19 @@ from matplotlib.ticker import MaxNLocator
 
 
 def create_dashboard(stock_data, ticker, sentiments_df):
-
     sentiments_df["date"] = pd.to_datetime(sentiments_df["publishedAt"]).dt.date
 
     # Add a column for sentiment polarity
-    sentiments_df["sentiment_type"] = sentiments_df["sentiments"].apply(lambda x: "positive" if x > 0 else "negative")
+    sentiments_df["sentiment_type"] = sentiments_df["sentiments"].apply(
+        lambda x: "positive" if x > 0 else "negative"
+    )
 
     fig, axs = plt.subplots(2, 2, figsize=(10, 8))
 
     # Plot 1: Number of rows for each day split by sentiment
-    daily_counts = sentiments_df.groupby(["date", "sentiment_type"]).size().unstack(fill_value=0)
+    daily_counts = (
+        sentiments_df.groupby(["date", "sentiment_type"]).size().unstack(fill_value=0)
+    )
     daily_counts.plot(kind="line", ax=axs[0, 0])
     axs[0, 0].set_title("Number of Articles Per Day by Sentiment")
     axs[0, 0].set_xlabel("Date")
@@ -22,7 +25,11 @@ def create_dashboard(stock_data, ticker, sentiments_df):
     axs[0, 0].tick_params(axis="x", rotation=30)
 
     # Plot 2 - Number of positive / negative articles
-    daily_mean_sentiments = sentiments_df.groupby(["date", "sentiment_type"])["sentiments"].mean().unstack(fill_value=0)
+    daily_mean_sentiments = (
+        sentiments_df.groupby(["date", "sentiment_type"])["sentiments"]
+        .mean()
+        .unstack(fill_value=0)
+    )
     daily_mean_sentiments.plot(kind="bar", ax=axs[0, 1])
     axs[0, 1].set_title("Mean Sentiment Score Per Day by Sentiment")
     axs[0, 1].set_xlabel("Date")
@@ -35,14 +42,16 @@ def create_dashboard(stock_data, ticker, sentiments_df):
     axs[1, 0].pie(
         source_counts,
         labels=source_counts.index,
-        autopct='%1.1f%%',
+        autopct="%1.1f%%",
         startangle=90,
-        textprops={'fontsize': 8}
+        textprops={"fontsize": 8},
     )
     axs[1, 0].set_title("Article Sources Distribution")
 
     # Plot 4 - Stock Price Plot
-    axs[1, 1].plot(stock_data.index, stock_data['Close'], label='Close Price', color='blue')
+    axs[1, 1].plot(
+        stock_data.index, stock_data["Close"], label="Close Price", color="blue"
+    )
 
     # Use MaxNLocator to avoid overlapping xticks
     axs[1, 1].xaxis.set_major_locator(MaxNLocator(nbins=6))  # Limit the number of ticks

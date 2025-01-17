@@ -25,7 +25,11 @@ class SentimentAnalysis(BaseModel):
                 result = self._sentiment_pipeline(article)[0]
 
                 # Extract score: positive scores are kept positive, negative are converted to negative
-                score = result["score"] if result["label"] == "POSITIVE" else -result["score"]
+                score = (
+                    result["score"]
+                    if result["label"] == "POSITIVE"
+                    else -result["score"]
+                )
                 sentiment_results.append(score)
             except Exception as e:
                 sentiment_results.append(None)
@@ -34,4 +38,3 @@ class SentimentAnalysis(BaseModel):
                 print(f"Article: {article}")
 
         return sentiment_results
-
