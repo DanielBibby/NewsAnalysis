@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "newsanalysis"
+version = "0.1.0"
+description = ""
+authors = ["Daniel Bibby <12dbibb@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pydantic = "^2.10.5"
+pandas = "^2.2.3"
+python-dotenv = "^1.0.1"
+requests = "^2.32.3"
+transformers = "^4.48.0"
+ipykernel = "^6.29.5"
+torch = "2.2.2"
+numpy = "1.26.4"
+streamlit = "^1.41.1"
+matplotlib = "^3.10.0"
+yfinance = "^0.2.51"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
