@@ -1,9 +1,11 @@
 import pandas as pd
-from pydantic import BaseModel
+from pydantic import BaseModel, SecretStr
 from typing import List, Optional
 
 from backend.src.sentiment_analysis.analysis import SentimentAnalysis
 from backend.src.news_finder.finder import NewsFinder
+
+import logging
 
 
 class BaseAnalysisChain(BaseModel):
@@ -11,6 +13,7 @@ class BaseAnalysisChain(BaseModel):
     start_date: str
     end_date: str
     additional: List[str] = []
+    api_key: Optional[SecretStr] = None
 
     news_finder: Optional[NewsFinder] = None
     sentiment_analysis: SentimentAnalysis = SentimentAnalysis()
@@ -21,12 +24,14 @@ class BaseAnalysisChain(BaseModel):
         start_date: str,
         end_date: str,
         additional: List[str] = [],
+        api_key: Optional[SecretStr] = None,
     ):
         super().__init__(
             company=company,
             start_date=start_date,
             end_date=end_date,
             additional=additional,
+            api_key=api_key,
         )
 
         self.company = company
@@ -38,6 +43,7 @@ class BaseAnalysisChain(BaseModel):
             start_date=self.start_date,
             end_date=self.end_date,
             company=self.company,
+            api_key=api_key,
         )
 
     def run(self):
@@ -46,6 +52,8 @@ class BaseAnalysisChain(BaseModel):
 
         :return: DataFrame with one row per article analysed and columns for key statistics from article analysis.
         """
+        logging.info("Chain Run Starting")
+
         articles, total_articles = self.news_finder.get_articles()
 
         descriptions = [article["description"] for article in articles]
