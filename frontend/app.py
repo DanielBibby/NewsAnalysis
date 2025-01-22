@@ -1,7 +1,6 @@
 import streamlit as st
 import yfinance as yf
 from datetime import datetime, timedelta
-import pandas as pd
 
 from utils import create_dashboard
 
@@ -23,7 +22,13 @@ st.title("News Sentiment and Stock Analysis 🧐")
 st.markdown(
     """
     This app provides a simple interface to see how the sentiment of news articles about a company has changed over
-    the last week, month, or year. Additionally, it retrieves and displays stock price data for the selected company.
+    the last week or month. Additionally, it retrieves and displays stock price data for the selected company.
+    
+    Note, the free plan of NewsAPI restricts API calls to 100 articles, so if you enter a prominant company or entity,
+    do not expect accurate results as articles used for analysis may only represent a small asmaple of news articles
+    published.
+    
+    Alternatively, you can enter any entity of your choice, celebrities, football teams etc. 
 """
 )
 
@@ -31,82 +36,94 @@ st.divider()
 
 st.markdown(
     """
-    *Note - I have tested the entities in the dropdown box 
-    to make sure they present results well. Feel free to enter 
-    a different company but don't expect total robustness.*
+**[Get your free API Key in 30 seconds](https://newsapi.org)**  
+
+*Enter your API Key below. Leave it blank if you've cloned the GitHub repository and followed README instructions.*
 """
 )
 
-st.divider()
+api_key = st.text_input("API Key", type="password")
 
 multi_company = st.selectbox(
-    label="Select company here", options=["Tesla", "Meta", "JPMorgan"]
+    label="Select company here", options=["Tesla", "Meta", "JPMorgan", "Other"]
 )
 
-st.markdown("**Or**")
+if multi_company == "Other":
+    col1, col2 = st.columns(2)
 
-col1, col2 = st.columns(2)
-
-with col1:
-    company = st.text_input(label="Company")
-with col2:
-    stock_code = st.text_input(label="Stock Ticker (Optional)")
+    with col1:
+        company = st.text_input(label="Company")
+    with col2:
+        stock_code = st.text_input(label="Stock Ticker (Optional)")
+else:
+    stock_code = None
+    company = None
 
 time_frame = st.radio(
     label="How far back would you like to see", options=["One Week", "One Month"]
 )
 
-# time_frame = st.select_slider(label = "How far back would you like to see?", options=[str(i) + " Days" for i in range(7, 31)])
 
-# Map the selected time frame to a timedelta
-time_frame_map = {
-    "One Week": timedelta(weeks=1),
-    "One Month": timedelta(days=30),
-}
+if st.button("Run Analysis"):
+    with st.spinner("Running analysis ..."):
+        # Map the selected time frame to a timedelta
+        time_frame_map = {
+            "One Week": timedelta(weeks=1),
+            "One Month": timedelta(days=30),
+        }
 
-# Set the date range
-end_date = datetime.now()
-start_date = end_date - time_frame_map[time_frame]
+        # Set the date range
+        end_date = datetime.now()
+        start_date = end_date - time_frame_map[time_frame]
 
-# If stock_code is not provided, map the selected company to a default ticker
-default_tickers = {"Tesla": "TSLA", "Meta": "META", "JPMorgan": "JPM"}
-ticker = stock_code or default_tickers.get(multi_company, None)
+        # If stock_code is not provided, map the selected company to a default ticker
+        default_tickers = {"Tesla": "TSLA", "Meta": "META", "JPMorgan": "JPM"}
+        ticker = stock_code or default_tickers.get(multi_company, None)
+        if ticker:
+            ticker = ticker.upper()
 
-if ticker:
-    st.subheader(
-        f"Stock Data for {multi_company if not company else company} ({ticker})"
-    )
+        if company:
+            chain = BaseAnalysisChain(
+                start_date=start_date.strftime("%Y-%m-%d"),
+                end_date=end_date.strftime("%Y-%m-%d"),
+                company=company,
+                api_key=api_key,
+            )
 
-    if company:
-        chain = BaseAnalysisChain(
-            start_date=start_date.strftime("%Y-%m-%d"),
-            end_date=end_date.strftime("%Y-%m-%d"),
-            company=company,
-        )
-
-    else:
-        chain = BaseAnalysisChain(
-            start_date=start_date.strftime("%Y-%m-%d"),
-            end_date=end_date.strftime("%Y-%m-%d"),
-            company=multi_company,
-        )
-
-    # run chain
-    sentiments_df, total_articles = chain.run()
-
-    try:
-        # Retrieve stock price data
-        stock_data = yf.download(ticker, start=start_date, end=end_date)
-
-        if not stock_data.empty:
-            # Plot the closing prices
-            st.write("Closing Prices Over Time:")
         else:
-            st.warning("No stock data available for the specified time range.")
-    except Exception as e:
-        st.error(f"Error fetching stock data: {e}")
+            chain = BaseAnalysisChain(
+                start_date=start_date.strftime("%Y-%m-%d"),
+                end_date=end_date.strftime("%Y-%m-%d"),
+                company=multi_company,
+                api_key=api_key,
+            )
 
-    fig = create_dashboard(stock_data, ticker, sentiments_df)
-    st.pyplot(fig)
-else:
-    st.warning("Please provide a valid stock ticker symbol.")
+        # run chain
+        sentiments_df, total_articles = chain.run()
+
+        # Retrieve stock market data
+        try:
+            if ticker:
+                stock_data = yf.download(ticker, start=start_date, end=end_date)
+
+                if stock_data.empty:
+                    st.warning(
+                        "No data available for that ticker and time frame, make sure you spelt it correctly."
+                    )
+            else:
+                stock_data = None
+        except Exception as e:
+            st.error(f"Error fetching stock data: {e}")
+
+        st.subheader(
+            f"Data for {multi_company if not company else company} and stock price of ({ticker}) based on 100 most popular "
+            f"articles from the last {time_frame[4:].lower()}"
+        )
+        st.markdown(
+            f"""
+        #### Total Articles: {total_articles}
+        """
+        )
+
+        fig = create_dashboard(stock_data, ticker, sentiments_df)
+        st.pyplot(fig)
