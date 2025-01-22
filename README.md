@@ -44,6 +44,3 @@ poetry shell
 poetry run streamlit run app.py
 ```
 
-
-
-
