@@ -105,7 +105,6 @@ if st.button("Run Analysis"):
 
         # run chain
         try:
-            st.header(f"API KEY BEING INPUT WAS {api_key}")
             sentiments_df, total_articles = chain.run()
 
             # Retrieve stock market data
