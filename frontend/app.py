@@ -28,7 +28,9 @@ st.markdown(
     do not expect accurate results as articles used for analysis may only represent a small asmaple of news articles
     published.
     
-    Alternatively, you can enter any entity of your choice, celebrities, football teams etc. 
+    Alternatively, select 'Other' from the dropdown menu below to enter an entity of your choice, such as a celebrity, 
+    football team, or anything else.
+
 """
 )
 
@@ -38,7 +40,7 @@ st.markdown(
     """
 **[Get your free API Key in 30 seconds](https://newsapi.org)**  
 
-*Enter your API Key below. Leave it blank if you've cloned the GitHub repository and followed README instructions.*
+*Enter your API Key below. Leave blank if you've cloned the GitHub repository and followed README instructions.*
 """
 )
 
@@ -122,6 +124,7 @@ if st.button("Run Analysis"):
         st.markdown(
             f"""
         #### Total Articles: {total_articles}
+        **Reminder - At most, 100 of these articles are being analysed.**
         """
         )
 
