@@ -137,5 +137,4 @@ if st.button("Run Analysis"):
             st.pyplot(fig)
 
         except APIException as e:
-            st.header("Invalid API key or something")
             st.error(str(e))
