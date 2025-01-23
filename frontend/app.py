@@ -10,6 +10,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from backend.src.analysis_chain.chain import BaseAnalysisChain
+from backend.src.news_finder.finder import APIException
 
 import warnings
 
@@ -101,7 +102,10 @@ if st.button("Run Analysis"):
             )
 
         # run chain
-        sentiments_df, total_articles = chain.run()
+        try:
+            sentiments_df, total_articles = chain.run()
+        except APIException as e:
+            st.error(str(e))
 
         # Retrieve stock market data
         try:
