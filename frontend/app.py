@@ -46,6 +46,8 @@ st.markdown(
 )
 
 api_key = st.text_input("API Key", type="password")
+if len(api_key) == 0:
+    api_key = None
 
 multi_company = st.selectbox(
     label="Select company here", options=["Tesla", "Meta", "JPMorgan", "Other"]
@@ -103,34 +105,38 @@ if st.button("Run Analysis"):
 
         # run chain
         try:
+            st.header(f"API KEY BEING INPUT WAS {api_key}")
             sentiments_df, total_articles = chain.run()
-        except APIException as e:
-            st.error(str(e))
 
-        # Retrieve stock market data
-        try:
-            if ticker:
-                stock_data = yf.download(ticker, start=start_date, end=end_date)
+            # Retrieve stock market data
+            try:
+                if ticker:
+                    stock_data = yf.download(ticker, start=start_date, end=end_date)
 
-                if stock_data.empty:
-                    st.warning(
-                        "No data available for that ticker and time frame, make sure you spelt it correctly."
-                    )
-            else:
+                    if stock_data.empty:
+                        st.warning(
+                            "No data available for that ticker and time frame, make sure you spelt it correctly."
+                        )
+                else:
+                    stock_data = None
+            except Exception as e:
                 stock_data = None
-        except Exception as e:
-            st.error(f"Error fetching stock data: {e}")
+                st.warning(f"Error fetching stock data")
 
-        st.subheader(
-            f"Data for {multi_company if not company else company} and stock price of ({ticker}) based on 100 most popular "
-            f"articles from the last {time_frame[4:].lower()}"
-        )
-        st.markdown(
-            f"""
-        #### Total Articles: {total_articles}
-        **Reminder - At most, 100 of these articles are being analysed.**
-        """
-        )
+            st.subheader(
+                f"Data for {multi_company if not company else company} and stock price of ({ticker}) based on 100 most popular "
+                f"articles from the last {time_frame[4:].lower()}"
+            )
+            st.markdown(
+                f"""
+            #### Total Articles: {total_articles}
+            **Reminder - At most, 100 of these articles are being analysed.**
+            """
+            )
 
-        fig = create_dashboard(stock_data, ticker, sentiments_df)
-        st.pyplot(fig)
+            fig = create_dashboard(stock_data, ticker, sentiments_df)
+            st.pyplot(fig)
+
+        except APIException as e:
+            st.header("Invalid API key or something")
+            st.error(str(e))

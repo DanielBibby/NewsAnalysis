@@ -28,7 +28,7 @@ class NewsFinder(BaseModel):
         :return: URL string
         """
         if not self.api_key:
-            self.api_key = os.getenv("NEWS_API_KEY")
+            self.api_key = SecretStr(os.getenv("NEWS_API_KEY"))
             if not self.api_key:
                 raise APIException(
                     "API key not found. Make sure it's entered above (or in the .env file if you cloned from GitHub)."
