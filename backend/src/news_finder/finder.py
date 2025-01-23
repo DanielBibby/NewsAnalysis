@@ -4,16 +4,14 @@ from dotenv import load_dotenv
 import os
 import requests
 
-import logging
-
-logging.basicConfig()
-
-import sys
-
-sys.tracebacklimit = 0
-
 # Load environment variables, used for those who cloned the repo from GitHub
 load_dotenv()
+
+
+class APIException(Exception):
+    def __init__(self, message):
+        self.message = message
+        super().__init__(message)
 
 
 class NewsFinder(BaseModel):
@@ -32,10 +30,9 @@ class NewsFinder(BaseModel):
         if not self.api_key:
             self.api_key = os.getenv("NEWS_API_KEY")
             if not self.api_key:
-                raise ValueError(
+                raise APIException(
                     "API key not found. Make sure it's entered above (or in the .env file if you cloned from GitHub)."
                 )
-        logging.info(f"API KEY {self.api_key}")
 
         base_url = "https://newsapi.org/v2/everything"
         query = f"{self.company}"
@@ -65,9 +62,9 @@ class NewsFinder(BaseModel):
         url = self._create_url()
         response = requests.get(url)
         if response.status_code == 403:
-            raise Exception("Invalid API Key")
+            raise APIException("Invalid API Key")
         elif response.status_code != 200:
-            raise Exception(
+            raise APIException(
                 f"Failed to fetch articles. HTTP Status: {response.status_code}, Response: {response.text}"
             )
 
